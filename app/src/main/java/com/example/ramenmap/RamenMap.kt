@@ -26,11 +26,18 @@ class RamenMap(private val zoomLevel: Float) {
     var location by mutableStateOf(LatLng(32.81449335495487, 130.72729505562057)) // デフォルトの位置（熊本）
 
     // 避難所のリスト
-    private val shelterPoints: MutableList<ShelterPoint> = mutableListOf()
+    private val ramenShops: MutableList<RamenShop> = mutableListOf()
 
     // 避難所のデータクラス
-    data class ShelterPoint(val name: String, val latitude: Double, val longitude: Double, val distance: Double)
-
+    //data class ShelterPoint(val name: String, val latitude: Double, val longitude: Double, val distance: Double)
+    data class RamenShop(
+        val name: String,
+        val latitude: Double,
+        val longitude: Double,
+        val distance: Double,
+        val type: String,
+        val review: Int
+    )
     // 地球の半径 (メートル)
     private val earthRadius = 6371000.0
 
@@ -54,15 +61,17 @@ class RamenMap(private val zoomLevel: Float) {
         //user.UpdateLocation()
         val context = LocalContext.current
         try {
-            val inputStream = context.resources.openRawResource(R.raw.shelters_kuma)
+            val inputStream = context.resources.openRawResource(R.raw.ramen_shop_data)
             val reader = BufferedReader(InputStreamReader(inputStream))
             val header = reader.readLine() // ヘッダーを取得
             val headerTokens = header.split(",")
 
             // 必要なカラムのインデックスを取得
-            val nameIndex = headerTokens.indexOf("施設・場所名")
+            val nameIndex = headerTokens.indexOf("店舗名")
             val latitudeIndex = headerTokens.indexOf("緯度")
             val longitudeIndex = headerTokens.indexOf("経度")
+            val typeIndex = headerTokens.indexOf("タイプ")
+            val reviewIndex = headerTokens.indexOf("レビュー")
 
             var line: String?
             while (reader.readLine().also { line = it } != null) {
@@ -71,21 +80,23 @@ class RamenMap(private val zoomLevel: Float) {
                 val name = tokens.getOrNull(nameIndex)
                 val latitude = tokens.getOrNull(latitudeIndex)?.toDoubleOrNull()
                 val longitude = tokens.getOrNull(longitudeIndex)?.toDoubleOrNull()
+                val type = tokens.getOrNull(typeIndex)
+                val review = tokens.getOrNull(reviewIndex)?.toIntOrNull()
 
-                if (name != null && latitude != null && longitude != null) {
+                if (name != null && latitude != null && longitude != null && type != null && review != null) {
                     // 距離を計算
                     val distance = calculateDistance(
                         location.latitude, location.longitude,
                         latitude, longitude
                     )
-                    // 2キロメートル以内の避難所のみ追加
-                    if (distance <= 2000) {
-                        shelterPoints.add(ShelterPoint(name, latitude, longitude, distance))
+                    // 500メートル以内のラーメン店のみ追加
+                    if (distance <= 500) {
+                        ramenShops.add(RamenShop(name, latitude, longitude, distance, type, review))
                         // デバッグ用のログ出力
-                        println("Added shelter: $name at ($latitude, $longitude), Distance: $distance meters")
+                        println("Added ramen shop: $name at ($latitude, $longitude), Type: $type, Review: $review, Distance: $distance meters")
                     }
                 } else {
-                    println("Invalid shelter data: $line")
+                    println("Invalid ramen shop data: $line")
                 }
             }
             reader.close()
@@ -94,7 +105,7 @@ class RamenMap(private val zoomLevel: Float) {
         }
 
         // 一番近い避難所を特定
-        val closestShelter = shelterPoints.minByOrNull { it.distance }
+        val closestShelter = ramenShops.minByOrNull { it.distance }
 
         // カメラポジションの初期設定
         val cameraPositionState = rememberCameraPositionState {
@@ -114,12 +125,12 @@ class RamenMap(private val zoomLevel: Float) {
             )
 
             // 避難所のピンを立てる
-            shelterPoints.forEach { shelter ->
+            ramenShops.forEach { ramenshop ->
                 Marker(
-                    position = LatLng(shelter.latitude, shelter.longitude),
-                    title = shelter.name,
-                    snippet = "避難所",
-                    icon = when (shelter) {
+                    position = LatLng(ramenshop.latitude, ramenshop.longitude),
+                    title = ramenshop.name,
+                    snippet = "${ramenshop.type} - レビュー: ${ramenshop.review}点",
+                    icon = when (ramenshop) {
                         closestShelter -> BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)
                         else -> BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
                     }
