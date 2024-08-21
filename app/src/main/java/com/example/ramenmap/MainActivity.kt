@@ -1,9 +1,11 @@
 package com.example.ramenmap
 
+import android.Manifest
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,31 +19,68 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.practice0819_2.RamenMap
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import android.content.pm.PackageManager
+import com.example.ramenmap.ui.theme.RamenMapTheme
+import androidx.compose.ui.platform.LocalContext
 
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = "main") {
-                composable("main") { MainScreen(navController) }
-                composable("stamp") { StampScreen().Content(navController) }
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        when {
+            permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true -> {
+                // パーミッションが許可された場合の処理
+                println("パーミッションが許可されました")
+            }
+            else -> {
+                // パーミッションが拒否された場合の処理
+                println("パーミッションが拒否されました")
 
             }
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // 共通の初期化処理
+        checkPermissions()
+        enableEdgeToEdge()
+
+        // UIの設定
+        setContent {
+            RamenMapTheme {
+                val navController = rememberNavController()
+                val user = User(LocalContext.current)
+                // for debug
+                val location = user.currentLocation.value
+                if (location != null) {
+                    println(location.latitude)
+                    println(location.longitude)
+                }
+
+                NavHost(navController = navController, startDestination = "main") {
+                    composable("main") { MainScreen(navController, user) }
+                    composable("stamp") { StampScreen().Content(navController) }
+                }
+
+                // ここでGreeting画面を直接呼び出すこともできます
+                // Greeting(user)
+            }
+        }
+    }
+
+
     @Composable
-    fun MainScreen(navController: androidx.navigation.NavHostController) {
-        val map = RamenMap(15f)
+    fun MainScreen(navController: androidx.navigation.NavHostController, user: User) {
+        val map = RamenMap(15f) // user引数を増やす
 
         Column(modifier = Modifier.fillMaxSize()) {
             // 上部70%にGoogle Mapを表示
@@ -76,12 +115,17 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun checkPermissions() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED -> {
+                requestPermissionLauncher.launch(
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+                )
+            }
+        }
+    }
 }
 
-
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    MainActivity().MainScreen(rememberNavController())
-}
