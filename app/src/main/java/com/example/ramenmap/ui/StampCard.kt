@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,13 +59,11 @@ class StampCard : ComponentActivity() {
 @Composable
 fun Input(){
     ArticleText(
-        title = "Information",
-        topic1 = "demo",
-        topic2 = "demo")
+        title = "Information")
 }
 
 @Composable
-fun ArticleText(title: String, topic1: String, topic2: String, modifier: Modifier = Modifier) {
+fun ArticleText(title: String) {
 //    val image = painterResource(id = R.drawable.bg_compose_background)
     Column(
         modifier = Modifier
@@ -84,15 +81,7 @@ fun ArticleText(title: String, topic1: String, topic2: String, modifier: Modifie
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(top = 8.dp,bottom = 16.dp)
         )
-//        Text(
-//            text = topic1,
-//            modifier = modifier
-//        )
-//        Text(
-//            text = topic2,
-//            modifier = modifier
-//        )
-        Scroll()
+        ForScroll()
         RadarChartView()
         Push(sms = 2657)
     }
@@ -144,8 +133,11 @@ fun Push(sms:Int){
     }
 }
 
+
+val importedStoreName = listOf("ラーメン屋タロウ","次郎","三郎","史郎","五郎")
+val importedStoreType = listOf("salt","soy","pork","jiro","salt")
 @Composable
-fun Scroll(){
+fun ForScroll(){
     val scrollState = rememberScrollState()
     Box(
         modifier = Modifier
@@ -160,16 +152,11 @@ fun Scroll(){
                 .verticalScroll(scrollState)
         )
         {
-            Column {
+            for (i in 0..5-1) {
                 Text(
-                    text = "あなたのスタンプラリー履歴",
+                    text = importedStoreName[i]+" ： "+ importedStoreType[i],
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "・ラーメン屋タロウ\n ・次郎\n・三郎\n・史郎\n・五郎",
-                    fontSize = 12.sp,
-                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }
@@ -179,17 +166,22 @@ fun Scroll(){
 @Composable
 fun RadarChartView() {
     // Sample data
+    val salt by remember { mutableStateOf(4)}
+    val soy by remember { mutableStateOf(5)}
+    val pork by remember { mutableStateOf(3)}
+    val jiro by remember { mutableStateOf(2)}
+
     val entries = listOf(
-        RadarEntry(0f, 5f),  // x 値（インデックス）、y 値（データ）
-        RadarEntry(1f, 3f),
-        RadarEntry(2f, 4f),
-        RadarEntry(3f, 2f)
+        RadarEntry(salt.toFloat(), 5f),  // x 値（インデックス）、y 値（データ）
+        RadarEntry(soy.toFloat(), 5f),
+        RadarEntry(pork.toFloat(), 5f),
+        RadarEntry(jiro.toFloat(), 5f)
     )
 
-    val dataSet = RadarDataSet(entries, "Sample Data").apply {
+    val dataSet = RadarDataSet(entries, "あなたの傾向").apply {
         color = android.graphics.Color.BLUE
         valueTextColor = android.graphics.Color.BLACK
-        valueTextSize = 12f
+        valueTextSize = 0f
     }
 
     val radarData = RadarData(dataSet)
@@ -210,6 +202,11 @@ fun RadarChartView() {
                     webLineWidth = 1f
                     webLineWidthInner = 1f
                     webAlpha = 100
+                    yAxis.apply{
+                        axisMinimum = 0f
+                        axisMaximum = 5f
+                        labelCount = 5
+                    }
                     invalidate() // Refresh chart
                 }
             },
