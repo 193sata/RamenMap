@@ -134,8 +134,9 @@ fun Push(sms:Int){
 }
 
 
-val importedStoreName = listOf("ラーメン屋タロウ","次郎","三郎","史郎","五郎")
-val importedStoreType = listOf("salt","soy","pork","jiro","salt")
+val importedStoreName = listOf("ラーメン屋タロウ","次郎","三郎","史郎","五郎","６号店","タロウ支店","二郎","七","とんこつ")
+val importedStoreType = listOf("salt","soy","pork","jiro","salt","salt","soy","pork","pork","salt")
+
 @Composable
 fun ForScroll(){
     val scrollState = rememberScrollState()
@@ -152,7 +153,7 @@ fun ForScroll(){
                 .verticalScroll(scrollState)
         )
         {
-            for (i in 0..5-1) {
+            for (i in 0..10-1) {
                 Text(
                     text = importedStoreName[i]+" ： "+ importedStoreType[i],
                     fontSize = 16.sp,
@@ -165,17 +166,26 @@ fun ForScroll(){
 
 @Composable
 fun RadarChartView() {
-    // Sample data
-    val salt by remember { mutableStateOf(4)}
-    val soy by remember { mutableStateOf(5)}
-    val pork by remember { mutableStateOf(3)}
-    val jiro by remember { mutableStateOf(2)}
-
+    var salt by remember { mutableStateOf(0)}
+    var soy by remember { mutableStateOf(0)}
+    var pork by remember { mutableStateOf(0)}
+    var jiro by remember { mutableStateOf(0)}
+    for (type in importedStoreType){
+        if (type == "salt"){
+            salt += 1
+        }else if (type == "soy"){
+            soy += 1
+        }else if (type == "pork"){
+            pork += 1
+        }else if (type == "jiro"){
+            jiro += 1
+        }
+    }
     val entries = listOf(
-        RadarEntry(salt.toFloat(), 5f),  // x 値（インデックス）、y 値（データ）
-        RadarEntry(soy.toFloat(), 5f),
-        RadarEntry(pork.toFloat(), 5f),
-        RadarEntry(jiro.toFloat(), 5f)
+        RadarEntry(salt.toFloat(), 1),
+        RadarEntry(soy.toFloat(), 1),
+        RadarEntry(pork.toFloat(), 1),
+        RadarEntry(jiro.toFloat(), 1)
     )
 
     val dataSet = RadarDataSet(entries, "あなたの傾向").apply {
@@ -204,10 +214,9 @@ fun RadarChartView() {
                     webAlpha = 100
                     yAxis.apply{
                         axisMinimum = 0f
-                        axisMaximum = 5f
                         labelCount = 5
                     }
-                    invalidate() // Refresh chart
+                    invalidate()
                 }
             },
             modifier = Modifier.fillMaxSize()
@@ -217,7 +226,6 @@ fun RadarChartView() {
 
 @Composable
 fun BarChartView() {
-    // Sample data
     val entries = listOf(
         BarEntry(0f, 5f),
         BarEntry(1f, 3f),
@@ -238,13 +246,12 @@ fun BarChartView() {
             .padding(8.dp)
             .background(Color.White)
     ) {
-        // Create BarChart
         AndroidView(
             factory = { context ->
                 BarChart(context).apply {
                     this.data = barData
                     description.isEnabled = false
-                    invalidate() // Refresh chart
+                    invalidate()
                 }
             },
             modifier = Modifier.fillMaxSize()
