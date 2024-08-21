@@ -19,6 +19,10 @@ import java.io.IOException
 import kotlin.math.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 
+import com.example.practice0819_2.RamenMap
+import com.example.ramenmap.RamenShopNavi
+import com.example.ramenmap.RamenShop
+
 class RamenMap(private val zoomLevel: Float) {
     //val user = User()
     // 現在地を保持するための変数
@@ -26,32 +30,9 @@ class RamenMap(private val zoomLevel: Float) {
     var location by mutableStateOf(LatLng(32.81449335495487, 130.72729505562057)) // デフォルトの位置（熊本）
 
     // 避難所のリスト
-    private val ramenShops: MutableList<RamenShop> = mutableListOf()
+    private var ramenShops: MutableList<RamenShop> = mutableListOf()
 
-    // 避難所のデータクラス
-    //data class ShelterPoint(val name: String, val latitude: Double, val longitude: Double, val distance: Double)
-    data class RamenShop(
-        val name: String,
-        val latitude: Double,
-        val longitude: Double,
-        val distance: Double,
-        val type: String,
-        val review: Int
-    )
-    // 地球の半径 (メートル)
-    private val earthRadius = 6371000.0
-
-    // 距離計算用関数 (ハーバサインの公式を使用)
-    //ここは一番評価の高いものを表示
-    private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-        val dLat = Math.toRadians(lat2 - lat1)
-        val dLon = Math.toRadians(lon2 - lon1)
-        val a = sin(dLat / 2) * sin(dLat / 2) +
-                cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) *
-                sin(dLon / 2) * sin(dLon / 2)
-        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-        return earthRadius * c
-    }
+    private var ramenShopNaviInstance = RamenShopNavi()
 
     // 初期化時にCSVファイルを読み込んで避難所リストに追加
     // 現在地から半径2キロ以内を取得
@@ -60,6 +41,9 @@ class RamenMap(private val zoomLevel: Float) {
         // UpdateLocationは、ユーザーがコンテンツを表示する際に呼び出されるようにする
         //user.UpdateLocation()
         val context = LocalContext.current
+        ramenShopNaviInstance.setUserPosition(location.latitude, location.longitude)
+        ramenShopNaviInstance.readCsvFile(context)
+
         try {
             val inputStream = context.resources.openRawResource(R.raw.ramen_shop_data)
             val reader = BufferedReader(InputStreamReader(inputStream))
@@ -73,33 +57,35 @@ class RamenMap(private val zoomLevel: Float) {
             val typeIndex = headerTokens.indexOf("タイプ")
             val reviewIndex = headerTokens.indexOf("レビュー")
 
-            var line: String?
-            while (reader.readLine().also { line = it } != null) {
-                val tokens = line!!.split(",")
+            ramenShops = ramenShopNaviInstance.getRamenShops(500.0)
 
-                val name = tokens.getOrNull(nameIndex)
-                val latitude = tokens.getOrNull(latitudeIndex)?.toDoubleOrNull()
-                val longitude = tokens.getOrNull(longitudeIndex)?.toDoubleOrNull()
-                val type = tokens.getOrNull(typeIndex)
-                val review = tokens.getOrNull(reviewIndex)?.toIntOrNull()
-
-                if (name != null && latitude != null && longitude != null && type != null && review != null) {
-                    // 距離を計算
-                    val distance = calculateDistance(
-                        location.latitude, location.longitude,
-                        latitude, longitude
-                    )
-                    // 500メートル以内のラーメン店のみ追加
-                    if (distance <= 500) {
-                        ramenShops.add(RamenShop(name, latitude, longitude, distance, type, review))
-                        // デバッグ用のログ出力
-                        println("Added ramen shop: $name at ($latitude, $longitude), Type: $type, Review: $review, Distance: $distance meters")
-                    }
-                } else {
-                    println("Invalid ramen shop data: $line")
-                }
-            }
-            reader.close()
+//            var line: String?
+//            while (reader.readLine().also { line = it } != null) {
+//                val tokens = line!!.split(",")
+//
+//                val name = tokens.getOrNull(nameIndex)
+//                val latitude = tokens.getOrNull(latitudeIndex)?.toDoubleOrNull()
+//                val longitude = tokens.getOrNull(longitudeIndex)?.toDoubleOrNull()
+//                val type = tokens.getOrNull(typeIndex)
+//                val review = tokens.getOrNull(reviewIndex)?.toIntOrNull()
+//
+//                if (name != null && latitude != null && longitude != null && type != null && review != null) {
+//                    // 距離を計算
+//                    val distance = calculateDistance(
+//                        location.latitude, location.longitude,
+//                        latitude, longitude
+//                    )
+//                    // 500メートル以内のラーメン店のみ追加
+//                    if (distance <= 500) {
+//                        ramenShops.add(RamenShop(name, latitude, longitude, distance, type, review))
+//                        // デバッグ用のログ出力
+//                        println("Added ramen shop: $name at ($latitude, $longitude), Type: $type, Review: $review, Distance: $distance meters")
+//                    }
+//                } else {
+//                    println("Invalid ramen shop data: $line")
+//                }
+//            }
+//            reader.close()
         } catch (e: IOException) {
             e.printStackTrace()
         }
