@@ -59,6 +59,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -66,5 +67,13 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // Google Maps Compose の依存関係
+    implementation(libs.google.play.services.maps)
+    implementation(libs.google.maps.compose)
+
+    // 追加: Google Play Services Location の依存関係
+    implementation(libs.google.play.services.location)
 }
