@@ -28,6 +28,10 @@ import androidx.navigation.compose.rememberNavController
 import android.content.pm.PackageManager
 import com.example.ramenmap.ui.theme.RamenMapTheme
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
 
 
 class MainActivity : ComponentActivity() {
@@ -60,11 +64,11 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val user = User(LocalContext.current)
                 // for debug
-                val location = user.currentLocation.value
-                if (location != null) {
-                    println(location.latitude)
-                    println(location.longitude)
-                }
+                //val location = user.currentLocation.value
+                //if (location != null) {
+                //    println(location.latitude)
+                //    println(location.longitude)
+                //å}
 
                 NavHost(navController = navController, startDestination = "main") {
                     composable("main") { MainScreen(navController, user) }
@@ -80,7 +84,8 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun MainScreen(navController: androidx.navigation.NavHostController, user: User) {
-        val map = RamenMap(15f) // user引数を増やす
+        var distance by mutableStateOf(500.0) // ここでdistanceを状態として管理
+        val map = RamenMap(15f, user.retrieveLocation())
 
         Column(modifier = Modifier.fillMaxSize()) {
             // 上部70%にGoogle Mapを表示
@@ -89,7 +94,7 @@ class MainActivity : ComponentActivity() {
                     .fillMaxWidth()
                     .weight(0.7f)
             ) {
-                map.Content()
+                map.Content() // 地図の表示
             }
 
             // 下部30%に現在地の座標とボタンを配置
@@ -106,15 +111,22 @@ class MainActivity : ComponentActivity() {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(onClick = {
-                    // ボタンのクリック処理をここに記述
                     navController.navigate("stamp")
-
                 }) {
                     Text(text = "ステータス")
+                }
+
+                Button(onClick = {
+                    distance += 500.0 // ここでdistanceを変更
+                    print(distance)
+                    map.ChangeDistance(distance)
+                }) {
+                    Text(text = "change distance")
                 }
             }
         }
     }
+
 
     private fun checkPermissions() {
         when {
