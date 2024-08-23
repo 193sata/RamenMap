@@ -31,7 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-
+import androidx.navigation.NavHostController
 
 
 class MainActivity : ComponentActivity() {
@@ -83,9 +83,9 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun MainScreen(navController: androidx.navigation.NavHostController, user: User) {
+    fun MainScreen(navController: NavHostController, user: User) {
         var distance by mutableStateOf(500.0) // ここでdistanceを状態として管理
-        val map = RamenMap(15f, user.retrieveLocation())
+        val map = RamenMap(15f)
 
         Column(modifier = Modifier.fillMaxSize()) {
             // 上部70%にGoogle Mapを表示
@@ -114,14 +114,6 @@ class MainActivity : ComponentActivity() {
                     navController.navigate("stamp")
                 }) {
                     Text(text = "ステータス")
-                }
-
-                Button(onClick = {
-                    distance += 500.0 // ここでdistanceを変更
-                    print(distance)
-                    map.ChangeDistance(distance)
-                }) {
-                    Text(text = "change distance")
                 }
             }
         }

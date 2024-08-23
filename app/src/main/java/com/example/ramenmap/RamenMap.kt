@@ -16,10 +16,8 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.IOException
-import kotlin.math.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 
-import com.example.practice0819_2.RamenMap
 import com.example.ramenmap.RamenShopNavi
 import com.example.ramenmap.RamenShop
 
