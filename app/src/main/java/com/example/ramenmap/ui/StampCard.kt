@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,13 +59,11 @@ class StampCard : ComponentActivity() {
 @Composable
 fun Input(){
     ArticleText(
-        title = "Information",
-        topic1 = "demo",
-        topic2 = "demo")
+        title = "Information")
 }
 
 @Composable
-fun ArticleText(title: String, topic1: String, topic2: String, modifier: Modifier = Modifier) {
+fun ArticleText(title: String) {
 //    val image = painterResource(id = R.drawable.bg_compose_background)
     Column(
         modifier = Modifier
@@ -84,15 +81,7 @@ fun ArticleText(title: String, topic1: String, topic2: String, modifier: Modifie
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(top = 8.dp,bottom = 16.dp)
         )
-//        Text(
-//            text = topic1,
-//            modifier = modifier
-//        )
-//        Text(
-//            text = topic2,
-//            modifier = modifier
-//        )
-        Scroll()
+        ForScroll()
         RadarChartView()
         Push(sms = 2657)
     }
@@ -144,8 +133,12 @@ fun Push(sms:Int){
     }
 }
 
+
+val importedStoreName = listOf("ラーメン屋タロウ","次郎","三郎","史郎","五郎","６号店","タロウ支店","二郎","七","とんこつ")
+val importedStoreType = listOf("salt","soy","pork","jiro","salt","salt","soy","pork","pork","salt")
+
 @Composable
-fun Scroll(){
+fun ForScroll(){
     val scrollState = rememberScrollState()
     Box(
         modifier = Modifier
@@ -160,16 +153,11 @@ fun Scroll(){
                 .verticalScroll(scrollState)
         )
         {
-            Column {
+            for (i in 0..10-1) {
                 Text(
-                    text = "あなたのスタンプラリー履歴",
+                    text = importedStoreName[i]+" ： "+ importedStoreType[i],
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "・ラーメン屋タロウ\n ・次郎\n・三郎\n・史郎\n・五郎",
-                    fontSize = 12.sp,
-                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }
@@ -178,18 +166,32 @@ fun Scroll(){
 
 @Composable
 fun RadarChartView() {
-    // Sample data
+    var salt by remember { mutableStateOf(0)}
+    var soy by remember { mutableStateOf(0)}
+    var pork by remember { mutableStateOf(0)}
+    var jiro by remember { mutableStateOf(0)}
+    for (type in importedStoreType){
+        if (type == "salt"){
+            salt += 1
+        }else if (type == "soy"){
+            soy += 1
+        }else if (type == "pork"){
+            pork += 1
+        }else if (type == "jiro"){
+            jiro += 1
+        }
+    }
     val entries = listOf(
-        RadarEntry(0f, 5f),  // x 値（インデックス）、y 値（データ）
-        RadarEntry(1f, 3f),
-        RadarEntry(2f, 4f),
-        RadarEntry(3f, 2f)
+        RadarEntry(salt.toFloat(), 1),
+        RadarEntry(soy.toFloat(), 1),
+        RadarEntry(pork.toFloat(), 1),
+        RadarEntry(jiro.toFloat(), 1)
     )
 
-    val dataSet = RadarDataSet(entries, "Sample Data").apply {
+    val dataSet = RadarDataSet(entries, "あなたの傾向").apply {
         color = android.graphics.Color.BLUE
         valueTextColor = android.graphics.Color.BLACK
-        valueTextSize = 12f
+        valueTextSize = 0f
     }
 
     val radarData = RadarData(dataSet)
@@ -210,7 +212,11 @@ fun RadarChartView() {
                     webLineWidth = 1f
                     webLineWidthInner = 1f
                     webAlpha = 100
-                    invalidate() // Refresh chart
+                    yAxis.apply{
+                        axisMinimum = 0f
+                        labelCount = 5
+                    }
+                    invalidate()
                 }
             },
             modifier = Modifier.fillMaxSize()
@@ -220,7 +226,6 @@ fun RadarChartView() {
 
 @Composable
 fun BarChartView() {
-    // Sample data
     val entries = listOf(
         BarEntry(0f, 5f),
         BarEntry(1f, 3f),
@@ -241,13 +246,12 @@ fun BarChartView() {
             .padding(8.dp)
             .background(Color.White)
     ) {
-        // Create BarChart
         AndroidView(
             factory = { context ->
                 BarChart(context).apply {
                     this.data = barData
                     description.isEnabled = false
-                    invalidate() // Refresh chart
+                    invalidate()
                 }
             },
             modifier = Modifier.fillMaxSize()
