@@ -141,36 +141,6 @@ fun Push(sms:Int){
 }
 
 
-val importedStoreName = listOf("ラーメン屋タロウ","次郎","三郎","史郎","五郎","６号店","タロウ支店","二郎","七","とんこつ")
-val importedStoreType = listOf("salt","soy","pork","jiro","salt","salt","soy","pork","pork","salt")
-
-@Composable
-fun ForScroll(){
-    val scrollState = rememberScrollState()
-    Box(
-        modifier = Modifier
-            .size(400.dp, 150.dp)
-            .padding(8.dp)
-            .background(Color.White)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .verticalScroll(scrollState)
-        )
-        {
-            for (i in 0..10-1) {
-                Text(
-                    text = importedStoreName[i]+" ： "+ importedStoreType[i],
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
-}
-
 @Composable
 fun loadCSVFromAssets(context: Context, fileName: String): List<String> {
     val csvLines = mutableListOf<String>()
@@ -255,41 +225,6 @@ fun RadarChartView() {
                         textColor = android.graphics.Color.BLACK
                         setDrawLabels((false))
                     }
-                    invalidate()
-                }
-            },
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-}
-
-@Composable
-fun BarChartView() {
-    val entries = listOf(
-        BarEntry(0f, 5f),
-        BarEntry(1f, 3f),
-        BarEntry(2f, 4f),
-        BarEntry(3f, 2f)
-    )
-
-    val dataSet = BarDataSet(entries, "Sample Data").apply {
-        color = Color.Gray.toArgb()
-        valueTextColor = Color.Blue.toArgb()
-        valueTextSize = 12f
-    }
-
-    val barData = BarData(dataSet)
-    Box(
-        modifier = Modifier
-            .size(400.dp, 400.dp)
-            .padding(8.dp)
-            .background(Color.White)
-    ) {
-        AndroidView(
-            factory = { context ->
-                BarChart(context).apply {
-                    this.data = barData
-                    description.isEnabled = false
                     invalidate()
                 }
             },
