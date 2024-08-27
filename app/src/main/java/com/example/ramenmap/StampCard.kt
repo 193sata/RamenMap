@@ -1,10 +1,6 @@
 package com.example.ramenmap
 
 import android.content.Context
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,26 +38,12 @@ import com.github.mikephil.charting.data.RadarEntry
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-class StampCard : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-                Column( // Surfaceを使って背景色を設定
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.LightGray)
-                ) {
-                    Input() // すべてのUIコンポーネントをここで呼び出す
-                }
-        }
-    }
-}
-
+class StampCard {
 @Composable
 fun Input(){
     ArticleText(
         title = "Information")
+    }
 }
 
 @Composable
@@ -135,7 +117,6 @@ fun Push(sms:Int){
     }
 }
 
-
 @Composable
 fun loadCSVFromAssets(context: Context, fileName: String): List<String> {
     val csvLines = mutableListOf<String>()
@@ -162,7 +143,7 @@ fun RadarChartView() {
     csvData = loadCSVFromAssets(context, "ramen_shop_data.csv").take(11)
     for (lines in csvData){
         val listLine: List<String> = lines.split(",")
-        val type = listLine[3]
+        val type :String = listLine[3]
             when(type){
             "塩" -> salt += 1
             "しょうゆ" -> soy += 1
@@ -246,8 +227,8 @@ fun CSVDisplayScreen() {
             Text(text = "直近１０件の訪問履歴", fontSize = 18.sp,modifier = Modifier.fillMaxWidth(), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
             // `for`文でCSVの各行を順に表示
             for (lines in csvData) {
-                val listLine: List<String> = lines.split(",")
-                val nameTime: List<String> = listOf(listLine[0], "★"+listLine[4])
+                val listLine2: List<String> = lines.split(",")
+                val nameTime: List<String> = listOf(listLine2[0], "★"+listLine2[4])
                 Text(text = nameTime.joinToString("  ")) // 各行のテキストを表示
                 HorizontalDivider() // 行の間に区切り線を表示
             }
@@ -258,5 +239,5 @@ fun CSVDisplayScreen() {
 @Preview(showBackground = true)
 @Composable
 fun InformationPreview() {
-    Input()
+    ArticleText(title = "Information")
 }
