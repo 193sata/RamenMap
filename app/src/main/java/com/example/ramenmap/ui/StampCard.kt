@@ -40,7 +40,7 @@ import com.github.mikephil.charting.data.RadarData
 import com.github.mikephil.charting.data.RadarDataSet
 import com.github.mikephil.charting.data.RadarEntry
 
-class StampCard : ComponentActivity() {
+/*class StampCard : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -53,6 +53,17 @@ class StampCard : ComponentActivity() {
                     Input() // すべてのUIコンポーネントをここで呼び出す
                 }
         }
+    }
+
+    fun onCreate() {
+        TODO("Not yet implemented")
+    }
+}*/
+
+class StampCard {
+    @Composable
+    fun content() {
+        Input()
     }
 }
 
