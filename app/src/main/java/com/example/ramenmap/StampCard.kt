@@ -1,10 +1,6 @@
 package com.example.ramenmap
 
 import android.content.Context
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,26 +38,12 @@ import com.github.mikephil.charting.data.RadarEntry
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-class StampCard : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-                Column( // Surfaceを使って背景色を設定
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.LightGray)
-                ) {
-                    Input() // すべてのUIコンポーネントをここで呼び出す
-                }
-        }
-    }
-}
-
+class StampCard {
 @Composable
 fun Input(){
     ArticleText(
         title = "Information")
+    }
 }
 
 @Composable
@@ -135,7 +117,6 @@ fun Push(sms:Int){
     }
 }
 
-
 @Composable
 fun loadCSVFromAssets(context: Context, fileName: String): List<String> {
     val csvLines = mutableListOf<String>()
@@ -153,24 +134,22 @@ fun loadCSVFromAssets(context: Context, fileName: String): List<String> {
 
 @Composable
 fun RadarChartView() {
-    var salt by remember { mutableStateOf(1)}
-    var soy by remember { mutableStateOf(1)}
-    var pork by remember { mutableStateOf(1)}
-    var jiro by remember { mutableStateOf(1)}
+    var salt by remember { mutableIntStateOf(1)}
+    var soy by remember { mutableIntStateOf(1)}
+    var pork by remember { mutableIntStateOf(1)}
+    var jiro by remember { mutableIntStateOf(1)}
     val context = LocalContext.current
     var csvData by remember { mutableStateOf(listOf<String>()) }
     csvData = loadCSVFromAssets(context, "ramen_shop_data.csv").take(11)
     for (lines in csvData){
         val listLine: List<String> = lines.split(",")
-        val type = listLine[3]
-            if (type == "塩") {
-                salt += 1
-            } else if (type == "しょうゆ") {
-                soy += 1
-            } else if (type == "とんこつ") {
-                pork += 1
-            } else if (type == "創作") {
-                jiro += 1
+        val type :String = listLine[3]
+            when(type){
+            "塩" -> salt += 1
+            "しょうゆ" -> soy += 1
+            "とんこつ" -> pork += 1
+            "創作"  -> jiro += 1
+                else -> continue
         }
     }
     val entries = listOf(
@@ -239,7 +218,7 @@ fun CSVDisplayScreen() {
     ) {
         val context = LocalContext.current
         var csvData by remember { mutableStateOf(listOf<String>()) }
-        csvData = loadCSVFromAssets(context, "visit_log.csv").take(11)
+        csvData = loadCSVFromAssets(context, "ramen_shop_data.csv").take(11)
         // 後ほど修正(LaunchedEffect?)
         Column(modifier = Modifier
             .fillMaxSize()
@@ -248,10 +227,10 @@ fun CSVDisplayScreen() {
             Text(text = "直近１０件の訪問履歴", fontSize = 18.sp,modifier = Modifier.fillMaxWidth(), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
             // `for`文でCSVの各行を順に表示
             for (lines in csvData) {
-                val listLine: List<String> = lines.split(",")
-                val nameTime: List<String> = listOf(listLine[0], "★"+listLine[4])
+                val listLine2: List<String> = lines.split(",")
+                val nameTime: List<String> = listOf(listLine2[0], "★"+listLine2[4])
                 Text(text = nameTime.joinToString("  ")) // 各行のテキストを表示
-                Divider() // 行の間に区切り線を表示
+                HorizontalDivider() // 行の間に区切り線を表示
             }
         }
     }
@@ -260,5 +239,5 @@ fun CSVDisplayScreen() {
 @Preview(showBackground = true)
 @Composable
 fun InformationPreview() {
-    Input()
+    ArticleText(title = "Information")
 }
