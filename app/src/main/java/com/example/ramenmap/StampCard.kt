@@ -91,7 +91,7 @@ fun Push(sms:Int){
                     message = "$count/$sms"
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Blue,
+                    containerColor = Color.Red,
                     contentColor = Color.White
                 )
             ) {
