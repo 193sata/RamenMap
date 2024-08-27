@@ -1,5 +1,6 @@
 package com.example.ramenmap
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,12 +10,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,20 +28,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.RadarChart
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.RadarData
 import com.github.mikephil.charting.data.RadarDataSet
 import com.github.mikephil.charting.data.RadarEntry
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 class StampCard : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,7 +83,7 @@ fun ArticleText(title: String) {
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(top = 8.dp,bottom = 16.dp)
         )
-        ForScroll()
+        CSVDisplayScreen()
         RadarChartView()
         Push(sms = 2657)
     }
@@ -134,51 +136,41 @@ fun Push(sms:Int){
 }
 
 
-val importedStoreName = listOf("ラーメン屋タロウ","次郎","三郎","史郎","五郎","６号店","タロウ支店","二郎","七","とんこつ")
-val importedStoreType = listOf("salt","soy","pork","jiro","salt","salt","soy","pork","pork","salt")
-
 @Composable
-fun ForScroll(){
-    val scrollState = rememberScrollState()
-    Box(
-        modifier = Modifier
-            .size(400.dp, 150.dp)
-            .padding(8.dp)
-            .background(Color.White)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .verticalScroll(scrollState)
-        )
-        {
-            for (i in 0..10-1) {
-                Text(
-                    text = importedStoreName[i]+" ： "+ importedStoreType[i],
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+fun loadCSVFromAssets(context: Context, fileName: String): List<String> {
+    val csvLines = mutableListOf<String>()
+    try {
+        val assetManager = context.assets
+        val inputStream = assetManager.open(fileName)
+        BufferedReader(InputStreamReader(inputStream)).useLines { lines ->
+            csvLines.addAll(lines)
         }
+    } catch (e: Exception) {
+        e.printStackTrace()
     }
+    return csvLines
 }
 
 @Composable
 fun RadarChartView() {
-    var salt by remember { mutableStateOf(0)}
-    var soy by remember { mutableStateOf(0)}
-    var pork by remember { mutableStateOf(0)}
-    var jiro by remember { mutableStateOf(0)}
-    for (type in importedStoreType){
-        if (type == "salt"){
-            salt += 1
-        }else if (type == "soy"){
-            soy += 1
-        }else if (type == "pork"){
-            pork += 1
-        }else if (type == "jiro"){
-            jiro += 1
+    var salt by remember { mutableStateOf(1)}
+    var soy by remember { mutableStateOf(1)}
+    var pork by remember { mutableStateOf(1)}
+    var jiro by remember { mutableStateOf(1)}
+    val context = LocalContext.current
+    var csvData by remember { mutableStateOf(listOf<String>()) }
+    csvData = loadCSVFromAssets(context, "ramen_shop_data.csv").take(11)
+    for (lines in csvData){
+        val listLine: List<String> = lines.split(",")
+        val type = listLine[3]
+            if (type == "塩") {
+                salt += 1
+            } else if (type == "しょうゆ") {
+                soy += 1
+            } else if (type == "とんこつ") {
+                pork += 1
+            } else if (type == "創作") {
+                jiro += 1
         }
     }
     val entries = listOf(
@@ -191,7 +183,17 @@ fun RadarChartView() {
     val dataSet = RadarDataSet(entries, "あなたの傾向").apply {
         color = android.graphics.Color.BLUE
         valueTextColor = android.graphics.Color.BLACK
-        valueTextSize = 0f
+        valueTextSize = 30f
+
+//        valueFormatter = object : ValueFormatter() {
+//            override fun getFormattedValue(value: Float): String {
+//                return when {
+//                    value >= 4 -> "High"
+//                    value >= 2 -> "Medium"
+//                    else -> "Low"
+//                }
+//            }
+//        }
     }
 
     val radarData = RadarData(dataSet)
@@ -215,6 +217,8 @@ fun RadarChartView() {
                     yAxis.apply{
                         axisMinimum = 0f
                         labelCount = 5
+                        textColor = android.graphics.Color.BLACK
+                        setDrawLabels((false))
                     }
                     invalidate()
                 }
@@ -225,37 +229,31 @@ fun RadarChartView() {
 }
 
 @Composable
-fun BarChartView() {
-    val entries = listOf(
-        BarEntry(0f, 5f),
-        BarEntry(1f, 3f),
-        BarEntry(2f, 4f),
-        BarEntry(3f, 2f)
-    )
-
-    val dataSet = BarDataSet(entries, "Sample Data").apply {
-        color = Color.Gray.toArgb()
-        valueTextColor = Color(0xFF5733).toArgb()
-        valueTextSize = 12f
-    }
-
-    val barData = BarData(dataSet)
+fun CSVDisplayScreen() {
+    val scrollState = rememberScrollState()
     Box(
         modifier = Modifier
-            .size(400.dp, 400.dp)
+            .size(400.dp, 150.dp)
             .padding(8.dp)
             .background(Color.White)
     ) {
-        AndroidView(
-            factory = { context ->
-                BarChart(context).apply {
-                    this.data = barData
-                    description.isEnabled = false
-                    invalidate()
-                }
-            },
-            modifier = Modifier.fillMaxSize()
-        )
+        val context = LocalContext.current
+        var csvData by remember { mutableStateOf(listOf<String>()) }
+        csvData = loadCSVFromAssets(context, "visit_log.csv").take(11)
+        // 後ほど修正(LaunchedEffect?)
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(scrollState)) {
+            Text(text = "直近１０件の訪問履歴", fontSize = 18.sp,modifier = Modifier.fillMaxWidth(), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+            // `for`文でCSVの各行を順に表示
+            for (lines in csvData) {
+                val listLine: List<String> = lines.split(",")
+                val nameTime: List<String> = listOf(listLine[0], "★"+listLine[4])
+                Text(text = nameTime.joinToString("  ")) // 各行のテキストを表示
+                Divider() // 行の間に区切り線を表示
+            }
+        }
     }
 }
 
