@@ -17,7 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -153,24 +153,22 @@ fun loadCSVFromAssets(context: Context, fileName: String): List<String> {
 
 @Composable
 fun RadarChartView() {
-    var salt by remember { mutableStateOf(1)}
-    var soy by remember { mutableStateOf(1)}
-    var pork by remember { mutableStateOf(1)}
-    var jiro by remember { mutableStateOf(1)}
+    var salt by remember { mutableIntStateOf(1)}
+    var soy by remember { mutableIntStateOf(1)}
+    var pork by remember { mutableIntStateOf(1)}
+    var jiro by remember { mutableIntStateOf(1)}
     val context = LocalContext.current
     var csvData by remember { mutableStateOf(listOf<String>()) }
     csvData = loadCSVFromAssets(context, "ramen_shop_data.csv").take(11)
     for (lines in csvData){
         val listLine: List<String> = lines.split(",")
         val type = listLine[3]
-            if (type == "塩") {
-                salt += 1
-            } else if (type == "しょうゆ") {
-                soy += 1
-            } else if (type == "とんこつ") {
-                pork += 1
-            } else if (type == "創作") {
-                jiro += 1
+            when(type){
+            "塩" -> salt += 1
+            "しょうゆ" -> soy += 1
+            "とんこつ" -> pork += 1
+            "創作"  -> jiro += 1
+                else -> continue
         }
     }
     val entries = listOf(
@@ -239,7 +237,7 @@ fun CSVDisplayScreen() {
     ) {
         val context = LocalContext.current
         var csvData by remember { mutableStateOf(listOf<String>()) }
-        csvData = loadCSVFromAssets(context, "visit_log.csv").take(11)
+        csvData = loadCSVFromAssets(context, "ramen_shop_data.csv").take(11)
         // 後ほど修正(LaunchedEffect?)
         Column(modifier = Modifier
             .fillMaxSize()
@@ -251,7 +249,7 @@ fun CSVDisplayScreen() {
                 val listLine: List<String> = lines.split(",")
                 val nameTime: List<String> = listOf(listLine[0], "★"+listLine[4])
                 Text(text = nameTime.joinToString("  ")) // 各行のテキストを表示
-                Divider() // 行の間に区切り線を表示
+                HorizontalDivider() // 行の間に区切り線を表示
             }
         }
     }
