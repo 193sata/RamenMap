@@ -40,7 +40,7 @@ import java.io.InputStreamReader
 
 class StampCard {
 @Composable
-fun Input(){
+fun Content(){
     ArticleText(
         title = "Information")
     }

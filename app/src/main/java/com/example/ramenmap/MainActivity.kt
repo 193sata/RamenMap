@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(navController = navController, startDestination = "main") {
                     composable("main") { MainScreen(navController, user) }
-                    composable("stamp") { StampCard().content() }
+                    composable("stamp") { StampCard().Content() }
                 }
 
                 // ここでGreeting画面を直接呼び出すこともできます
