@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RamenMap"
         tools:targetApi="31">
-        <activity
+        <!--<activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.RamenMap">
@@ -28,10 +28,20 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>-->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MyApp.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+
     </application>
 
 </manifest>

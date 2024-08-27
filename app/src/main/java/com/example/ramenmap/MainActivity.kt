@@ -53,7 +53,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        // スプラッシュ画面の表示時間を設定（例えば2秒）
+        //setTheme(R.style.Theme_MyApp)
         // 共通の初期化処理
         checkPermissions()
         enableEdgeToEdge()
@@ -72,7 +73,7 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(navController = navController, startDestination = "main") {
                     composable("main") { MainScreen(navController, user) }
-                    composable("stamp") { StampScreen().Content(navController) }
+                    composable("stamp") { StampCard().content() }
                 }
 
                 // ここでGreeting画面を直接呼び出すこともできます

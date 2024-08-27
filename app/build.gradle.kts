@@ -77,4 +77,7 @@ dependencies {
 
     // 追加: Google Play Services Location の依存関係
     implementation(libs.google.play.services.location)
+
+    implementation("androidx.core:core-splashscreen:1.0.0")
+
 }
